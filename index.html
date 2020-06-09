@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+  <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css" integrity="sha384-Bfad6CLCknfcloXFOyFnlgtENryhrpZCe29RTifKEixXQZ38WheV+i/6YWSzkz3V" crossorigin="anonymous">
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <title>Document</title>
+</head>
+<style>
+      * {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        vertical-align: baseline;
+      }
+
+      body {
+        max-width: 60%;
+        width: 100%;
+        height: 100%;
+        margin: auto;
+        background-color: #50defa;
+      }
+
+</style>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+      var backgroundColor = ["#50defa", "#faa550", "#eb6e6e", "#9aeb6e", "#4458db", "#595b69", "#b32fd4", "#e04caf", "#d92e2e"]
+
+      var body = document.getElementsByTagName("BODY")[0];
+
+      class QuoteMachine extends React.Component {
+
+        constructor(props) {
+          super(props);
+
+          this.state = {
+            quotes: [],
+            quote: '',
+            author: '',
+            url: ''
+          };
+
+          this.getQuotes = this.getQuotes.bind(this);
+          this.getQuote = this.getQuote.bind(this);
+        }
+
+        changeBackground() {
+          let idx = Math.floor(Math.random() * backgroundColor.length)
+          body.style.backgroundColor = backgroundColor[idx];
+        }
+
+        getQuotes() {
+              axios.get('https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json')
+
+          .then((response) => {
+
+            const qsList = response.data.quotes;
+
+            const qs = qsList.map(item => {
+              return {
+                quote: item.quote,
+                author: item.author
+              }
+            })
+
+            this.setState({
+              quotes: qs
+            });
+
+            this.getQuote();
+
+          });
+        }
+
+        getQuote() {
+          let idx = Math.floor(Math.random() * this.state.quotes.length)
+          let qo = this.state.quotes[idx];
+          let Url = 'https://twitter.com/intent/tweet?hashtags=quotes&related=freecodecamp&text='.concat(qo.quote);
+
+
+          console.log(Url);
+
+          this.setState({
+            quote: qo.quote,
+            author: qo.author,
+            url: Url
+          })
+
+          this.changeBackground();
+        }
+
+        componentDidMount() {
+          this.getQuotes();
+        }
+
+        render() {
+
+          return (
+            <div className='container bg-light p-3 mt-5 rounded'>
+                <div id="quote-box m-10">
+                    <div className="row">
+                      <i className="fa fa-quote-left fa-5x fa-pull-left col-1" aria-hidden="true"></i>
+                      <div id="text" className='display-4 text-wrap col text-info'>
+                        {this.state.quote}
+                      </div>
+                    </div>
+                    <br />
+                    <div className="row">
+                        <div className="col"></div>
+                        <div id="author" className="text-right mr-3 col h4">
+                            <p className="blockquote-footer">
+                              {this.state.author}
+                            </p>
+                        </div>
+                        <div className="col-2"></div>
+                        <br />
+                        <br />
+                        <br />
+                    </div>
+              </div>
+              <div className='row'>
+                <div className="col-2"></div>
+                <div className='col'>
+                  <a id="tweet-quote" className="fab fa-twitter col" href={this.state.url} target='_blank'> Twitter</a>
+                </div>
+                <div className="col-2"></div>
+                <div className='col-3 ml-md-10'>
+                      <button className="btn btn-primary" id="new-quote" onClick={this.getQuote}>New Quote</button>
+                </div>
+                <br /><br />
+
+                </div>
+          </div>
+
+          )
+        }
+      }
+
+      ReactDOM.render(
+        <QuoteMachine />,
+        document.getElementById('root')
+      );
+
+  </script>
+</body>
+</html>
